@@ -5,7 +5,6 @@ import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
 import { useNavigate } from 'react-router-dom';
 
-// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAoxO_n9LLMBKEVu6WdBjKwivnVofPymy8",
   authDomain: "gss-application.firebaseapp.com",

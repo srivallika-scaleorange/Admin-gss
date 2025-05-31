@@ -424,7 +424,6 @@ function Dashboard() {
       setLoading(true);
       const existingSankalpa = sankalpams.find((sankalpa) => sankalpa.id === sankalpaId) || {};
       const payload = {
-        userName: updatedData.userName,
         email: updatedData.email || existingSankalpa.email || '',
         sankalpam_name: updatedData.sankalpam_name,
         sankalpam_location: updatedData.sankalpam_location || existingSankalpa.sankalpam_location || '',
