@@ -5,7 +5,6 @@ import { getFirestore, collection, getDocs, addDoc, doc, deleteDoc, updateDoc, g
 import { initializeApp } from 'firebase/app';
 import Sidebar from './Sidebar';
 import Users from './Users';
-import Payments from './Payments';
 import Sankalpams from './Sankalpams';
 import Notifications from './Notifications';
 import Leaderboard from './Leaderboard';
@@ -415,43 +414,6 @@ function Dashboard() {
         code: error.code,
       });
       alert(`Failed to update EMI payment: ${error.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleUpdatePayment = async (paymentId, updatedData) => {
-    if (!updatedData.user_id?.trim() || !updatedData.amount) {
-      alert('Please provide both user ID and amount for the payment.');
-      return;
-    }
-    if (!updatedData.membership_type || !updatedData.payment_status) {
-      alert('Please provide membership type and payment status.');
-      return;
-    }
-    try {
-      setLoading(true);
-      const existingPayment = payments.find((payment) => payment.id === paymentId) || {};
-      const payload = {
-        user_id: updatedData.user_id.trim(),
-        amount: parseFloat(updatedData.amount) || 0,
-        membership_type: updatedData.membership_type.trim(),
-        payment_status: updatedData.payment_status || 'pending',
-        transaction_id: updatedData.transaction_id?.trim() || '',
-        created_at: updatedData.created_at || existingPayment.created_at || new Date().toISOString(),
-        receipt_image: updatedData.receipt_image || '',
-        payment_screenshot: updatedData.payment_screenshot || '',
-      };
-      console.log('Updating payment with payload:', payload);
-      await updateDoc(doc(db, 'payments', paymentId), payload);
-      await fetchPayments();
-      alert('Payment updated successfully.');
-    } catch (error) {
-      console.error('Error updating payment:', {
-        message: error.message,
-        code: error.code,
-      });
-      alert(`Failed to update payment: ${error.message}`);
     } finally {
       setLoading(false);
     }
