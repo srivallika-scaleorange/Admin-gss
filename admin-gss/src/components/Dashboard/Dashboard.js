@@ -285,33 +285,71 @@ function Dashboard() {
     setLoading(false);
   };
 
+  // const handleEditVideo = async (videoData) => {
+  //   if (!videoData.title?.trim() || !videoData.youtubeUrl?.trim()) {
+  //     alert('Please provide both title and YouTube URL.');
+  //     return;
+  //   }
+  //   const youtubeUrlRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/(watch\?v=|embed\/|v\/|.+\?v=)?([a-zA-Z0-9_-]{11})(\?.*)?$/;
+  //   if (!youtubeUrlRegex.test(videoData.youtubeUrl)) {
+  //     alert('Please provide a valid YouTube URL.');
+  //     return;
+  //   }
+  //   try {
+  //     setLoading(true);
+  //     const payload = {
+  //       title: videoData.title,
+  //       youtubeUrl: videoData.youtubeUrl,
+  //       timestamp: videoData.timestamp || new Date().toISOString(),
+  //     };
+  //     await updateDoc(doc(db, 'videos', videoData.id), payload);
+  //     await fetchVideos();
+  //     alert('Video updated successfully.');
+  //   } catch (error) {
+  //     console.error('Error editing video:', error);
+  //     alert('Failed to edit video.');
+  //   }
+  //   setLoading(false);
+  // };
   const handleEditVideo = async (videoData) => {
+    console.log('Received video data for edit:', videoData); // This should show the full object
+    
+    // Check if videoData is just an ID (wrong) or a full object (correct)
+    if (typeof videoData === 'string') {
+      console.error('ERROR: Received only ID instead of full video object:', videoData);
+      return;
+    }
+    
     if (!videoData.title?.trim() || !videoData.youtubeUrl?.trim()) {
+      console.log('Validation failed - Title:', videoData.title, 'URL:', videoData.youtubeUrl);
       alert('Please provide both title and YouTube URL.');
       return;
     }
+    
     const youtubeUrlRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/(watch\?v=|embed\/|v\/|.+\?v=)?([a-zA-Z0-9_-]{11})(\?.*)?$/;
     if (!youtubeUrlRegex.test(videoData.youtubeUrl)) {
       alert('Please provide a valid YouTube URL.');
       return;
     }
+    
     try {
       setLoading(true);
       const payload = {
-        title: videoData.title,
-        youtubeUrl: videoData.youtubeUrl,
+        title: videoData.title.trim(),
+        youtubeUrl: videoData.youtubeUrl.trim(),
         timestamp: videoData.timestamp || new Date().toISOString(),
       };
+      
       await updateDoc(doc(db, 'videos', videoData.id), payload);
       await fetchVideos();
       alert('Video updated successfully.');
     } catch (error) {
       console.error('Error editing video:', error);
       alert('Failed to edit video.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
-
   const handleDeleteVideo = async (id) => {
     if (!window.confirm('Are you sure you want to delete this video?')) return;
     try {
