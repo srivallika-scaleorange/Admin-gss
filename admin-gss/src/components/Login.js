@@ -89,7 +89,7 @@ function Login() {
         } else if (userData.role === 'kshetralevel_admin') {
           navigate('/dashboard/sankalpams');
         } else if (userData.role === 'accountant') {
-          navigate('/dashboard/payments');
+          navigate('/dashboard/emi_payments');
         }
       }, 1000);
     } catch (error) {
