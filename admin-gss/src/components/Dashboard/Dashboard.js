@@ -10,8 +10,6 @@ import Notifications from './Notifications';
 import Leaderboard from './Leaderboard';
 import YouTubeVideos from './YoutubeVideos';
 import EmiPayments from './EmiPayments';
-
-// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAoxO_n9LLMBKEVu6WdBjKwivnVofPymy8",
   authDomain: "gss-application.firebaseapp.com",

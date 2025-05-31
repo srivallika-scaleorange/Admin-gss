@@ -358,10 +358,60 @@ const EMIPayments = () => {
     fetchEMIPayments();
   }, []);
 
+  // const handleUpdatePayment = async (emiId, updatedValues) => {
+  //   try {
+  //     const db = getFirestore();
+  //     if (updatedValues.payment_type === 'emi') {
+  //       await updateDoc(doc(db, 'emi_payments', emiId), {
+  //         user_id: updatedValues.user_id,
+  //         amount: parseFloat(updatedValues.amount) || 0,
+  //         transaction_id: updatedValues.transaction_id,
+  //         payment_status: updatedValues.payment_status,
+  //         payment_screenshot: updatedValues.payment_screenshot,
+  //       });
+
+  //       if (updatedValues.payment_status === 'approved') {
+  //         const paymentId = updatedValues.payment_id;
+  //         const emiPaymentsQuery = await getDocs(
+  //           query(collection(db, 'emi_payments'), where('payment_id', '==', paymentId), where('payment_status', '==', 'approved'))
+  //         );
+  //         const approvedCount = emiPaymentsQuery.size;
+  //         const parentPaymentQuery = await getDocs(query(collection(db, 'payments'), where('__name__', '==', paymentId)));
+  //         if (!parentPaymentQuery.empty) {
+  //           const parentPayment = parentPaymentQuery.docs[0].data();
+  //           const initialRemainingMonths = parentPayment.membership_type === '12 months' ? 12 : 24;
+  //           const updatedRemainingMonths = Math.max(initialRemainingMonths - approvedCount, 0);
+  //           await updateDoc(doc(db, 'payments', paymentId), {
+  //             remaining_months_to_pay: updatedRemainingMonths,
+  //           });
+  //           setEMIPayments((prev) =>
+  //             prev.map((p) =>
+  //               p.payment_id === paymentId ? { ...p, remaining_months_to_pay: updatedRemainingMonths } : p
+  //             )
+  //           );
+  //         }
+  //       }
+  //     } else {
+  //       await updateDoc(doc(db, 'payments', updatedValues.payment_id), {
+  //         user_id: updatedValues.user_id,
+  //         amount: parseFloat(updatedValues.amount) || 0,
+  //         transaction_id: updatedValues.transaction_id,
+  //         payment_status: updatedValues.payment_status,
+  //         payment_screenshot: updatedValues.payment_screenshot,
+  //       });
+  //     }
+  //     showNotification('Payment updated successfully', 'success');
+  //     fetchEMIPayments();
+  //   } catch (error) {
+  //     console.error('Error updating payment:', error);
+  //     showNotification('Failed to update payment', 'error');
+  //   }
+  // };
   const handleUpdatePayment = async (emiId, updatedValues) => {
     try {
       const db = getFirestore();
       if (updatedValues.payment_type === 'emi') {
+        // Update emi_payments collection
         await updateDoc(doc(db, 'emi_payments', emiId), {
           user_id: updatedValues.user_id,
           amount: parseFloat(updatedValues.amount) || 0,
@@ -369,7 +419,8 @@ const EMIPayments = () => {
           payment_status: updatedValues.payment_status,
           payment_screenshot: updatedValues.payment_screenshot,
         });
-
+  
+        // Update remaining_months_to_pay for EMI payments
         if (updatedValues.payment_status === 'approved') {
           const paymentId = updatedValues.payment_id;
           const emiPaymentsQuery = await getDocs(
@@ -379,16 +430,19 @@ const EMIPayments = () => {
           const parentPaymentQuery = await getDocs(query(collection(db, 'payments'), where('__name__', '==', paymentId)));
           if (!parentPaymentQuery.empty) {
             const parentPayment = parentPaymentQuery.docs[0].data();
-            const initialRemainingMonths = parentPayment.membership_type === '12 months' ? 12 : 24;
-            const updatedRemainingMonths = Math.max(initialRemainingMonths - approvedCount, 0);
-            await updateDoc(doc(db, 'payments', paymentId), {
-              remaining_months_to_pay: updatedRemainingMonths,
-            });
-            setEMIPayments((prev) =>
-              prev.map((p) =>
-                p.payment_id === paymentId ? { ...p, remaining_months_to_pay: updatedRemainingMonths } : p
-              )
-            );
+            // Only update for EMI membership types
+            if (['12 months', '24 months'].includes(parentPayment.membership_type)) {
+              const initialRemainingMonths = parentPayment.membership_type === '12 months' ? 12 : 24;
+              const updatedRemainingMonths = Math.max(initialRemainingMonths - approvedCount, 0);
+              await updateDoc(doc(db, 'payments', paymentId), {
+                remaining_months_to_pay: updatedRemainingMonths,
+              });
+              setEMIPayments((prev) =>
+                prev.map((p) =>
+                  p.payment_id === paymentId ? { ...p, remaining_months_to_pay: updatedRemainingMonths } : p
+                )
+              );
+            }
           }
         }
       } else {
@@ -398,6 +452,7 @@ const EMIPayments = () => {
           transaction_id: updatedValues.transaction_id,
           payment_status: updatedValues.payment_status,
           payment_screenshot: updatedValues.payment_screenshot,
+          remaining_months_to_pay: 0, 
         });
       }
       showNotification('Payment updated successfully', 'success');
@@ -407,7 +462,6 @@ const EMIPayments = () => {
       showNotification('Failed to update payment', 'error');
     }
   };
-
   const handleViewImage = (payment) => {
     const imageData = payment.payment_screenshot;
     console.log('Attempting to view image:', imageData ? `${imageData.substring(0, 30)}...` : 'N/A');
